@@ -1,0 +1,46 @@
+---
+- block:
+  - name: SUDO | add user `{{ _user.key }}` to `wheel` group
+    user:
+      name: "{{ _user.key }}"
+      groups: wheel
+      append: true
+      state: present
+    when: ansible_os_family == 'RedHat' and _user.value.sudo.enabled and
+          not _user.value.sudo.passwordless
+    tags: [ create_user ]
+
+  - name: SUDO | add user `{{ _user.key }}` to passwordless sudoers
+    lineinfile:
+      dest: "/etc/sudoers.d/{{ _user.key }}"
+      create: true
+      owner: root
+      group: root
+      mode: 0640
+      serole: object_r
+      setype: etc_t
+      line: "{{ _user.key }}     ALL=(ALL)       NOPASSWD: ALL"
+    when: _user.value.sudo.passwordless
+    tags: [ enable_passwordless_sudo ]
+
+  become: true
+  when: _user.value.enabled
+
+- block:
+  - name: SUDO | remove user `{{ _user.key }}` from `wheel` group
+    user:
+      name: "{{ _user.key }}"
+      groups: wheel
+      append: true
+      state: absent
+    when: ansible_os_family == 'RedHat' and _user.value.sudo.enabled and
+          not _user.value.sudo.passwordless
+
+  - name: SUDO | remove user `{{ _user.key }}` from passwordless sudoers
+    file:
+      dest: "/etc/sudoers.d/{{ _user.key }}"
+      state: absent
+
+  when: not _user.value.enabled
+  become: true
+  tags: [ cleanup ]

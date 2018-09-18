@@ -1,0 +1,26 @@
+---
+galaxy_info:
+  author: Alexey Shchukin
+  description: This role provides the ability for high-level user management
+  issue_tracker_url: https://github.com/ma11oc/ansible-user/issues
+  license: MIT
+  min_ansible_version: 2.0
+  github_branch: master
+  platforms:
+  - name: EL
+    versions:
+    - 7
+  - name: Fedora
+    versions:
+    - 27
+    - 26
+    - 25
+  - name: Debian
+    versions:
+    - stretch
+    - jessie
+    - wheezy
+
+  galaxy_tags: [ bash, prompt, sudo, user ]
+
+dependencies: []

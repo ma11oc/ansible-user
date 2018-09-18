@@ -1,0 +1,51 @@
+---
+- block:
+  - name: PROMPT | add extra functions to systemwide bashrc
+    blockinfile:
+      dest: "/etc/bashrc"
+      create: true
+      marker: "# {mark} extra functions managed by ansible"
+      block: "{{ lookup('file', '../files/bash_functions') }}"
+    become: true
+
+  - name: PROMPT | setup bashrc for user `{{ _user.key }}`
+    blockinfile:
+      dest: ~/.bashrc
+      marker: "# {mark} source /etc/bashrc"
+      block: |
+        if [ -f /etc/bashrc ]; then
+          . /etc/bashrc
+        fi
+    become: true
+    become_user: "{{ _user.key }}"
+    when: ansible_os_family == 'Debian'
+
+  - name: PROMPT | setup PS1 for user `{{ _user.key }}`
+    blockinfile:
+      create: true
+      dest: ~/.bashrc
+      marker: "# {mark} setup PS1 by ansible"
+      block: "{{ lookup('file', '../files/prompt_command') }}"
+    become: true
+    become_user: "{{ _user.key }}"
+    when: not _user.value.prompt.systemwide
+
+  - name: PROMPT | setup PS1 systemwide
+    blockinfile:
+      dest: '/etc/bashrc'
+      marker: "# {mark} setup PS1 by ansible"
+      block: "{{ lookup('file', '../files/prompt_command') }}"
+    become: true
+    when: _user.value.prompt.systemwide
+
+  - name: PROMPT | setup custom prompt when sudo for user `{{ _user.key }}`
+    blockinfile:
+      dest: '/etc/bashrc'
+      marker: "# {mark} apply prompt when sudo"
+      state: "{{ 'absent' if not _user.value.enabled else 'present' }}"
+      block: "{{ lookup('template', '../templates/prompt_command') }}"
+    become: true
+    when: not _user.value.prompt.systemwide
+
+  when: _user.value.prompt.enabled and _user.value.enabled
+  tags: [ setup_prompt ]

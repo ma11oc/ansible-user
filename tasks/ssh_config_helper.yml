@@ -1,0 +1,13 @@
+---
+- name: put host configuration into .ssh/config
+  blockinfile:
+    dest: "{{ lookup('env', 'HOME') }}/.ssh/config"
+    create: true
+    owner: "{{ local_user_name }}"
+    group: "{{ local_user_group }}"
+    mode: 0600
+    marker: "# {mark} ansible managed: {{ inventory_hostname }}"
+    block: "{{ lookup('template', 'host_config.j2') }}"
+  delegate_to: localhost
+  when: update_local_ssh_config
+  tags: [ configure_ssh, update_local_ssh_config ]

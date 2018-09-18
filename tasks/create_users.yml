@@ -1,0 +1,11 @@
+---
+- name: USER | create user `{{ _user.key }}`
+  user:
+    name: "{{ _user.key }}"
+    append: true
+    state: "{{ 'present' if _user.value.enabled else 'absent' }}"
+    shell: /bin/bash
+    update_password: always
+    password: "{{ _user.value.password if _user.value.password is defined else '' }}"
+  become: true
+  tags: [ create_user ]

@@ -1,0 +1,135 @@
+# Reset
+RESET='\[\e[0m\]'
+
+# Regular Colors
+FG_BLACK='\[\e[0;30m\]'
+FG_RED='\[\e[0;31m\]'
+FG_GREEN='\[\e[0;32m\]'
+FG_YELLOW='\[\e[0;33m\]'
+FG_BLUE='\[\e[0;34m\]'
+FG_MAGENTA='\[\e[0;35m\]'
+FG_CYAN='\[\e[0;36m\]'
+FG_WHITE='\[\e[0;37m\]'
+
+# Background
+BG_BLACK='\[\e[40m\]'
+BG_RED='\[\e[41m\]'
+BG_GREEN='\[\e[42m\]'
+BG_YELLOW='\[\e[43m\]'
+BG_BLUE='\[\e[44m\]'
+BG_PURPLE='\[\e[45m\]'
+BG_CYAN='\[\e[46m\]'
+BG_WHITE='\[\e[47m\]'
+
+DEFAULT_FG=$FG_CYAN
+USER_FG=$FG_YELLOW
+HOST_FG=$FG_YELLOW
+DIR_FG=$FG_WHITE
+ERROR_FG=$FG_RED
+
+OPEN_SEGMENT_SYMBOL='['
+CLOSE_SEGMENT_SYMBOL=']'
+FIRST_LINE_START_SYMBOL='┌'
+SECOND_LINE_START_SYMBOL='└'
+
+function timer_start {
+  TIMER=${TIMER:-$SECONDS}
+}
+function timer_stop {
+  TIMER_SHOW=$(($SECONDS - $TIMER))
+  unset TIMER
+}
+
+# called before every command
+trap 'timer_start' DEBUG
+# called after every command
+# PROMPT_COMMAND=timer_stop
+
+function set_privileges_color() {
+  if [ $EUID -ne 0 ]
+  then
+    PRIVILEGES_FG=$DEFAULT_FG
+  else
+    PRIVILEGES_FG=$FG_RED
+    USER_FG=$FG_RED
+  fi
+}
+
+function prompt_start_1st_line() {
+  printf "${PRIVILEGES_FG}${FIRST_LINE_START_SYMBOL}"
+}
+function prompt_start_2nd_line() {
+ printf "\n${PRIVILEGES_FG}${SECOND_LINE_START_SYMBOL}"
+}
+
+function prompt_status() {
+  local local_separator='│'
+  local symbols=''
+  local rc=$RETVAL
+  local timer=$TIMER_SHOW
+
+  if [ $rc -ne 0 ]
+  then
+    symbols+="${ERROR_FG}${rc}${DEFAULT_FG}${local_separator}"
+  fi
+
+  if [ $(jobs -l | wc -l) -gt 0 ]
+  then
+    symbols+="${DEFAULT_FG}*${DEFAULT_FG}${local_separator}"
+  fi
+
+  if [[ $timer -gt 0 ]]
+  then
+    symbols+="${FG_GREEN}${timer}s${DEFAULT_FG}"
+  else
+    symbols+="0s${DEFAULT_FG}"
+  fi
+
+  if [ -n "$symbols" ]
+  then
+    printf "${PRIVILEGES_FG}${OPEN_SEGMENT_SYMBOL}"
+    printf "${DEFAULT_FG}$symbols"
+    printf "${PRIVILEGES_FG}${CLOSE_SEGMENT_SYMBOL}"
+  fi
+}
+
+function prompt_context() {
+# Context: user@hostname (who am I and where am I)
+  local user=$(whoami)
+  local context=''
+
+  context+="${PRIVILEGES_FG}${OPEN_SEGMENT_SYMBOL}"
+  context+="${USER_FG}${user}"
+  context+="${DEFAULT_FG}@"
+  context+="${HOST_FG}\h"
+  context+="${PRIVILEGES_FG}${CLOSE_SEGMENT_SYMBOL}"
+
+  printf "$context"
+}
+
+function prompt_dir() {
+  printf "${PRIVILEGES_FG}${OPEN_SEGMENT_SYMBOL}${DIR_FG}\w"
+  printf "${PRIVILEGES_FG}${CLOSE_SEGMENT_SYMBOL}"
+}
+
+function prompt_end() {
+  printf "${PRIVILEGES_FG} $([[ EUID -ne 0 ]] && printf '$' || printf '#')${RESET} "
+}
+
+
+function build_prompt() {
+  set_privileges_color
+  prompt_start_1st_line
+  prompt_status
+  prompt_dir
+  prompt_start_2nd_line
+  prompt_context
+  prompt_end
+}
+
+function set_prompt() {
+  RETVAL=$?
+  timer_stop
+
+  PS1="$(build_prompt)"
+}

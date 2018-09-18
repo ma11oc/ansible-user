@@ -1,0 +1,8 @@
+Host {{ inventory_hostname }}
+  Hostname {{ hostvars[inventory_hostname]['ansible_host'] }}
+  User {{ remote_user_name }}
+  IdentitiesOnly yes
+  IdentityFile {{ hostvars[inventory_hostname]['ansible_ssh_private_key_file'] }}
+  GSSAPIAuthentication no
+  PasswordAuthentication no
+  RSAAuthentication yes

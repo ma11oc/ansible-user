@@ -1,0 +1,29 @@
+---
+- name: Converge
+  hosts: all
+  roles:
+    - role: ansible-user
+      users:
+        root:
+          password: "$6$JOYM5lAJ3HsvqH1$PYCBLv8iXhjgG8eDXoHD5Y7iFADP49YUgxm6Hr7tqw67TJ0bWIoYS4jSirW9pllqkE9Y.8KMF5xoprAJgtBkF1"
+
+        foo:
+          sudo:
+            enabled: true
+            passwordless: true
+          public_key: |
+            ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3/3m4Mmayc46tEQy+jriWzr+R05DztbrKyL4tn3bCwenFPcFeJ+MSZQ7/4fG998kAyqs4yRXE7+yTt8zBTkLdFjh6O+e76SVUjMZbkDJSwdZPf0ue48DMDZkk0RpW79iwR+8UrM9cxqCmgP+2S0IV/67qqFDo307Pik3tpPZXjlP96wrP751Mn59OnNupO6gvQnd9Sat8Iync4R7tQYtt+bHPzXL1h1tmOmD/FyMcq3l424npG7P9MHgciaPdQ+WBTqyPSx3wax1NF2zBDg10pYURSZSnW9dXy19Syzz3Ohd6XLTOTTP1sWFTLzEcnctj4XFjx94yeAcOyBxibc2V MARKER
+
+        bar:
+          password: "$6$JOYM5lAJ3HsvqH1$PYCBLv8iXhjgG8eDXoHD5Y7iFADP49YUgxm6Hr7tqw67TJ0bWIoYS4jSirW9pllqkE9Y.8KMF5xoprAJgtBkF1"
+          sudo:
+            enabled: true
+          prompt:
+            enabled: true
+
+        baz:
+          sudo:
+            enabled: true
+            passwordless: true
+          prompt:
+            enabled: true

@@ -1,0 +1,13 @@
+---
+
+defaults:
+  user:
+    enabled: true
+    password: null
+    sudo:
+      enabled: false
+      passwordless: false
+    prompt:
+      enabled: false
+      systemwide: false
+    public_key: null

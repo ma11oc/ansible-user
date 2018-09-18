@@ -1,0 +1,18 @@
+---
+- block:
+  - name: SSH | create .ssh directory for user `{{ _user.key }}`
+    file:
+      mode: 0700
+      path: ~/.ssh
+      state: "{{ 'directory' if _user.value.enabled else 'absent' }}"
+
+  - name: SSH | put key to authorized_keys for user {{ _user.key }}
+    authorized_key:
+      user: "{{ _user.key }}"
+      state: "{{ 'present' if _user.value.enabled else 'absent' }}"
+      key: "{{ _user.value.public_key }}"
+
+  when: _user.value.public_key
+  become: true
+  become_user: "{{ _user.key }}"
+  tags: [ configure_ssh, cleanup ]

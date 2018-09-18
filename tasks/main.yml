@@ -1,0 +1,40 @@
+---
+- name: VARS | merge dictionaries
+  set_fact:
+    _users: "{% if users is defined -%}
+               {% set _users = {} -%}
+               {% for k,v in users.iteritems() -%}
+                 {{ _users.update({ k: defaults.user | combine(v, recursive=True) }) -}}
+               {% endfor -%}
+               {{ _users -}}
+             {% else -%}
+               {{ {} -}}
+             {% endif -%}"
+
+- name: USER | create users
+  include_tasks: create_users.yml
+  with_dict: "{{ _users }}"
+  when: _users != {}
+  loop_control:
+    loop_var: _user
+
+- name: SUDO | setup sudoers
+  include_tasks: setup_sudoers.yml
+  with_dict: "{{ _users }}"
+  when: _users != {}
+  loop_control:
+    loop_var: _user
+
+- name: SSH | setup ssh rsa authentication
+  include_tasks: setup_key_auth.yml
+  with_dict: "{{ _users }}"
+  when: _users != {}
+  loop_control:
+    loop_var: _user
+
+- name: PROMPT | setup prompt
+  include_tasks: setup_prompt.yml
+  with_dict: "{{ _users }}"
+  when: _users != {}
+  loop_control:
+    loop_var: _user
