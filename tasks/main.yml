@@ -3,7 +3,7 @@
   set_fact:
     _users: "{% if users is defined -%}
                {% set _users = {} -%}
-               {% for k,v in users.iteritems() -%}
+               {% for k,v in users.items() -%}
                  {{ _users.update({ k: defaults.user | combine(v, recursive=True) }) -}}
                {% endfor -%}
                {{ _users -}}
