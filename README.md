@@ -13,17 +13,16 @@ This role provides an ability of high-level user management on target systems
 The following block describes default values of variables. It will be merged with variables, defined by user as role vars (see [Example Playbook](#example-playbook)).
 
 ```yaml
-defaults:
-  user:
-    enabled: true
-    password: null
-    sudo:
-      enabled: false
-      passwordless: false
-    prompt:
-      enabled: false
-      systemwide: false
-    public_key: null
+user_defaults:
+  enabled: true
+  password: null
+  sudo:
+    enabled: false
+    passwordless: false
+  prompt:
+    enabled: false
+    systemwide: false
+  public_key: null
 ```
 
 ## Dependencies
@@ -42,17 +41,17 @@ Since role's variables will be merged with defaults, you need to define only req
   roles:
     - role: ansible-user
       users:
-        root:
+        - name: root
           password: "$6$DuTTmMSk/JaS$GF.08qDPa7EqhoYt/BMwrrwVO0ojDWAvhKlZ/UgFQ8.Xfp0duQBp8Z6YIe/q/bF29etOoJ23r49VZtEKHyqAc."
 
-        user1:
+        - name: user1
           sudo:
             enabled: true
             passwordless: true
           public_key: |
             ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDH0NvqvX7QBLryFe6MYD8cW459FHoMRbaM5Gn6IH30Hg0ll5gAKMshlNVfhspWAg6VAqR57qP3ofbuwaq4VOMmOwUfz+Orkakknv+BxNmvue3SXI5VxYINF4VbOZVLsDopqMYqCqM9wVYQg/KBUW6GXZ2nvZ4ZI5LS9epYjyK8clXeeA/CT64S1m/1iAUi7WOovp1aq38lcdBalH6QRfJe0NKSnAAsWeMq77IN10Zn0YfyFPihQI8yujShjH9mLgygxEQ13PmKjfDOxwNes7+EATqBj59cHLf65Qih/h5bLD/Uuj++mckmvdjtb190V3XWa0bpoDGFWD/hncP+FFbX workstation
 
-        user2:
+        - name: user2
           password: "$6$QbzN8OUg$oY5HhEDpfWfw5q40kp/tHmGOadaZ5bnPOtnyiPq8B5HZAqoLYOaVgtF1Rd5mIvaCM10YamNWzT2Qw9ObaiHt81"
           sudo:
             enabled: true

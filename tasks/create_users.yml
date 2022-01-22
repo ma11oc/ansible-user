@@ -1,11 +1,14 @@
 ---
-- name: USER | create user `{{ _user.key }}`
+- name: USER | create user `{{ _user.name }}`
   user:
-    name: "{{ _user.key }}"
+    name: "{{ _user.name }}"
+    create_home: "{{ _user.create_home | default(true) }}"
     append: true
-    state: "{{ 'present' if _user.value.enabled else 'absent' }}"
-    shell: /bin/bash
+    groups: "{{ _user.groups | default([]) }}"
+    state: "{{ _user.enabled | ternary('present', 'absent') }}"
+    shell: "{{ _user.shell | default('/bin/bash') }}"
+    system: "{{ _user.system | default(false) | bool }}"
     update_password: always
-    password: "{{ _user.value.password if _user.value.password is defined else '' }}"
+    password: "{{ _user.password | default('') }}"
   become: true
   tags: [ create_user ]

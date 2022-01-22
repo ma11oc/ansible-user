@@ -1,13 +1,19 @@
 ---
+users: []
 
-defaults:
-  user:
-    enabled: true
-    password: null
-    sudo:
-      enabled: false
-      passwordless: false
-    prompt:
-      enabled: false
-      systemwide: false
-    public_key: null
+user_defaults:
+  create_home: true
+  enabled: true
+  groups: []
+  password: null
+  prompt:
+    enabled: false
+    systemwide: false
+  public_keys: []
+  shell: /bin/bash
+  sudo:
+    enabled: false
+    passwordless: false
+  system: false
+
+update_local_ssh_config: false

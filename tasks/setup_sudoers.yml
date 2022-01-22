@@ -1,46 +1,50 @@
 ---
 - block:
-  - name: SUDO | add user `{{ _user.key }}` to `wheel` group
+  - debug:
+      var: _user
+    tags: [create_user]
+
+  - name: SUDO | add user `{{ _user.name }}` to `wheel` group
     user:
-      name: "{{ _user.key }}"
+      name: "{{ _user.name }}"
       groups: wheel
       append: true
       state: present
-    when: ansible_os_family == 'RedHat' and _user.value.sudo.enabled and
-          not _user.value.sudo.passwordless
+    when: ansible_os_family == 'RedHat' and _user.sudo.enabled and
+          not _user.sudo.passwordless
     tags: [ create_user ]
 
-  - name: SUDO | add user `{{ _user.key }}` to passwordless sudoers
+  - name: SUDO | add user `{{ _user.name }}` to passwordless sudoers
     lineinfile:
-      dest: "/etc/sudoers.d/{{ _user.key }}"
+      dest: "/etc/sudoers.d/{{ _user.name }}"
       create: true
       owner: root
       group: root
       mode: 0640
       serole: object_r
       setype: etc_t
-      line: "{{ _user.key }}     ALL=(ALL)       NOPASSWD: ALL"
-    when: _user.value.sudo.passwordless
+      line: "{{ _user.name }}     ALL=(ALL)       NOPASSWD: ALL"
+    when: _user.sudo.passwordless
     tags: [ enable_passwordless_sudo ]
 
   become: true
-  when: _user.value.enabled
+  when: _user.enabled
 
 - block:
-  - name: SUDO | remove user `{{ _user.key }}` from `wheel` group
+  - name: SUDO | remove user `{{ _user.name }}` from `wheel` group
     user:
-      name: "{{ _user.key }}"
+      name: "{{ _user.name }}"
       groups: wheel
       append: true
       state: absent
-    when: ansible_os_family == 'RedHat' and _user.value.sudo.enabled and
-          not _user.value.sudo.passwordless
+    when: ansible_os_family == 'RedHat' and _user.sudo.enabled and
+          not _user.sudo.passwordless
 
-  - name: SUDO | remove user `{{ _user.key }}` from passwordless sudoers
+  - name: SUDO | remove user `{{ _user.name }}` from passwordless sudoers
     file:
-      dest: "/etc/sudoers.d/{{ _user.key }}"
+      dest: "/etc/sudoers.d/{{ _user.name }}"
       state: absent
 
-  when: not _user.value.enabled
+  when: not _user.enabled
   become: true
   tags: [ cleanup ]

@@ -5,10 +5,11 @@
       dest: "/etc/bashrc"
       create: true
       marker: "# {mark} extra functions managed by ansible"
+      mode: 0644
       block: "{{ lookup('file', '../files/bash_functions') }}"
     become: true
 
-  - name: PROMPT | setup bashrc for user `{{ _user.key }}`
+  - name: PROMPT | setup bashrc for user `{{ _user.name }}`
     blockinfile:
       dest: ~/.bashrc
       marker: "# {mark} source /etc/bashrc"
@@ -17,18 +18,19 @@
           . /etc/bashrc
         fi
     become: true
-    become_user: "{{ _user.key }}"
+    become_user: "{{ _user.name }}"
     when: ansible_os_family == 'Debian'
 
-  - name: PROMPT | setup PS1 for user `{{ _user.key }}`
+  - name: PROMPT | setup PS1 for user `{{ _user.name }}`
     blockinfile:
       create: true
       dest: ~/.bashrc
       marker: "# {mark} setup PS1 by ansible"
+      mode: 0644
       block: "{{ lookup('file', '../files/prompt_command') }}"
     become: true
-    become_user: "{{ _user.key }}"
-    when: not _user.value.prompt.systemwide
+    become_user: "{{ _user.name }}"
+    when: not _user.prompt.systemwide
 
   - name: PROMPT | setup PS1 systemwide
     blockinfile:
@@ -36,16 +38,30 @@
       marker: "# {mark} setup PS1 by ansible"
       block: "{{ lookup('file', '../files/prompt_command') }}"
     become: true
-    when: _user.value.prompt.systemwide
+    when: _user.prompt.systemwide
 
-  - name: PROMPT | setup custom prompt when sudo for user `{{ _user.key }}`
+  - name: PROMPT | setup custom prompt when sudo for user `{{ _user.name }}`
     blockinfile:
       dest: '/etc/bashrc'
       marker: "# {mark} apply prompt when sudo"
-      state: "{{ 'absent' if not _user.value.enabled else 'present' }}"
+      state: "{{ _user.enabled | ternary('present', 'absent') }}"
       block: "{{ lookup('template', '../templates/prompt_command') }}"
     become: true
-    when: not _user.value.prompt.systemwide
+    when: not _user.prompt.systemwide
 
-  when: _user.value.prompt.enabled and _user.value.enabled
+  - name: PROMPT | Check if /etc/bash.bashrc exists
+    stat:
+      path: /etc/bash.bashrc
+    register: bashbashrc
+
+  - name: PROMPT | Apply /etc/bashrc from /etc/bash.bashrc `{{ _user.name }}`
+    blockinfile:
+      dest: '/etc/bash.bashrc'
+      marker: "# {mark} apply prompt systemwide"
+      state: "{{ _user.prompt.systemwide | ternary('present', 'absent') }}"
+      block: "source /etc/bashrc"
+    become: true
+    when: bashbashrc.stat.exists
+
+  when: _user.prompt.enabled and _user.enabled
   tags: [ setup_prompt ]

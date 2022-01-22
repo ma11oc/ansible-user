@@ -1,4 +1,4 @@
-if [ "$SUDO_USER" == "{{ _user.key }}" ]
+if [ "$SUDO_USER" == "{{ _user.name }}" ]
 then
   PROMPT_COMMAND=set_prompt
 fi
